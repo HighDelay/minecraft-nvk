@@ -1,0 +1,14 @@
+.gradle/
+.cache/
+**/build/
+dist/
+run/
+*.log
+__pycache__/
+*.pyc
+.DS_Store
+._*
+*.dylib
+*.dSYM/
+/runtime/
+/essential-baseline/

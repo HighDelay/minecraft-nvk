@@ -1,0 +1,38 @@
+dependencies {
+    compileOnly('net.fabricmc:sponge-mixin:0.17.4+mixin.0.8.7') { transitive = false }
+    compileOnly 'org.lwjgl:lwjgl:3.4.3'
+    compileOnly 'org.lwjgl:lwjgl-vulkan:3.4.3'
+
+    testImplementation platform('org.junit:junit-bom:5.13.4')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    testImplementation 'org.lwjgl:lwjgl:3.4.3'
+    testImplementation 'org.lwjgl:lwjgl-vulkan:3.4.3'
+    testImplementation 'org.lwjgl:lwjgl-sdl:3.4.3'
+    testRuntimeOnly 'org.lwjgl:lwjgl:3.4.3:natives-macos'
+    testRuntimeOnly 'org.lwjgl:lwjgl-sdl:3.4.3:natives-macos'
+    testImplementation 'org.ow2.asm:asm-tree:9.10.1'
+    testImplementation "net.fabricmc:sponge-mixin:${providers.gradleProperty('mixinTestVersion').getOrElse('0.17.4+mixin.0.8.7')}"
+}
+
+tasks.register('verifyMixinTransformation', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'dev.nvkbridge.runtime.MixinTransformationVerifier'
+    args layout.projectDirectory.file('../.cache/minecraft-26.3-client.jar').asFile.absolutePath
+}
+
+tasks.register('verifyMinecraftHooks', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'dev.nvkbridge.runtime.MinecraftHookVerifier'
+    args layout.projectDirectory.file('../.cache/minecraft-26.3-client.jar').asFile.absolutePath
+}
+
+tasks.register('verifyNativeRuntime', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'dev.nvkbridge.runtime.NativeRuntimeVerifier'
+    jvmArgs '-XstartOnFirstThread', '--enable-native-access=ALL-UNNAMED'
+    args providers.gradleProperty('nvkRuntime').getOrElse('')
+}

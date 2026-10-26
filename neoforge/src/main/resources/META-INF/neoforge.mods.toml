@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[12,)"
+license="MIT"
+
+[[mods]]
+modId="nvkbridge"
+version="${version}"
+displayName="NVK Bridge"
+description='''Selects an external NVK Vulkan runtime for Minecraft's existing renderer on Intel macOS.'''
+
+[[mixins]]
+config="nvkbridge.mixins.json"
+
+[[dependencies.nvkbridge]]
+modId="minecraft"
+type="required"
+versionRange="[26.3]"
+ordering="NONE"
+side="CLIENT"
+
+[[dependencies.nvkbridge]]
+modId="neoforge"
+type="required"
+versionRange="[26.3.0.99,26.4)"
+ordering="NONE"
+side="CLIENT"

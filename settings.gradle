@@ -1,0 +1,2 @@
+rootProject.name = 'nvk-bridge'
+include 'common', 'fabric', 'neoforge'

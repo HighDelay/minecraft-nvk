@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "id": "nvkbridge",
+  "version": "${version}",
+  "name": "NVK Bridge",
+  "description": "Selects an external NVK Vulkan runtime for Minecraft's existing renderer on Intel macOS.",
+  "environment": "client",
+  "license": "MIT",
+  "entrypoints": {
+    "client": ["dev.nvkbridge.fabric.NvkBridgeFabric"]
+  },
+  "mixins": ["nvkbridge.mixins.json"],
+  "depends": {
+    "fabricloader": ">=0.19.5",
+    "minecraft": "=26.3",
+    "java": ">=25"
+  }
+}

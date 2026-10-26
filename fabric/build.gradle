@@ -1,0 +1,18 @@
+dependencies {
+    implementation project(':common')
+    compileOnly('net.fabricmc:fabric-loader:0.19.5') { transitive = false }
+}
+
+tasks.named('processResources') {
+    inputs.property 'version', project.version
+    filesMatching('fabric.mod.json') { expand version: project.version }
+}
+
+tasks.named('jar') {
+    archiveBaseName = 'nvk-bridge-fabric-26.3'
+    from project(':common').sourceSets.main.output
+}
+
+tasks.named('sourcesJar') {
+    from project(':common').sourceSets.main.allSource
+}

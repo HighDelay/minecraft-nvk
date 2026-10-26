@@ -1,0 +1,65 @@
+{
+  "recorded_at": "2026-10-26",
+  "evidence_type": "Static class-file inspection with JDK 25 javap; no game execution or GPU validation",
+  "manifest_url": "https://piston-meta.mojang.com/v1/packages/61fff1316bd50312624a858bbb5eb18fa45208ed/26.3.json",
+  "target": {
+    "minecraft": "26.3",
+    "java": 25,
+    "lwjgl": "3.4.3",
+    "window_library": "SDL",
+    "client_sha1": "e877b6a07acd633fb3bb475002175cec036e7b87",
+    "client_sha256": "4508d006323f24fa02876310c192d739af56516eb259000ac50f0909a68c9a2d"
+  },
+  "bootstrap": {
+    "owner": "com.mojang.blaze3d.platform.NativeLibrariesBootstrap",
+    "method": "tryLoadingVulkan()Z",
+    "hook": "INVOKESTATIC org/lwjgl/vulkan/VK.create()V",
+    "hook_count": 1,
+    "hook_bytecode_offset": 19,
+    "throwable_handler_covers_hook": true,
+    "selection": "Set Configuration.VULKAN_LIBRARY_NAME immediately before VK.create; use Configuration.set instead of relying on a late System property change",
+    "verification": "Inspect loaded provider after successful VK.create; never destroy and recreate it to switch drivers",
+    "failure": "Vanilla catches Throwable, records loader failure and returns false; no same-process MoltenVK retry is promised"
+  },
+  "sdl_alignment": {
+    "owner": "com.mojang.renderpearl.backend.vulkan.VulkanBackend",
+    "method": "loadLibrary()V",
+    "observed_sequence": [
+      "Get VK function provider as SharedLibrary",
+      "Obtain SharedLibrary.getPath()",
+      "Pass that path to SDL_Vulkan_LoadLibrary(CharSequence)",
+      "Compare provider vkGetInstanceProcAddr with SDL_Vulkan_GetVkGetInstanceProcAddr",
+      "On mismatch unload SDL Vulkan library and raise platform error"
+    ],
+    "mod_constraint": "Preserve vanilla alignment; add no independent SDL or GLFW initialization"
+  },
+  "required_device": {
+    "minimum_api": "Vulkan 1.2",
+    "extensions": [
+      "VK_KHR_dynamic_rendering",
+      "VK_KHR_push_descriptor",
+      "VK_KHR_synchronization2",
+      "VK_EXT_vertex_attribute_divisor",
+      "VK_KHR_swapchain"
+    ],
+    "features": [
+      "multiDrawIndirect",
+      "drawIndirectFirstInstance",
+      "samplerAnisotropy",
+      "shaderDrawParameters",
+      "timelineSemaphore",
+      "hostQueryReset",
+      "synchronization2",
+      "dynamicRendering",
+      "vertexAttributeInstanceRateDivisor"
+    ],
+    "queue_requirement": "Combined graphics, compute and presentation queue",
+    "conditional_portability_feature": "triangleFans when VK_KHR_portability_subset is advertised",
+    "portability_enumeration": "Enabled with the instance flag on macOS only when supported by the selected library"
+  },
+  "limitations": [
+    "The native NVK WSI implementation remains separate work",
+    "Fabric and NeoForge transformation order still needs actual client testing",
+    "No SDL surface, Minecraft rendering or performance result was obtained by this static inspection"
+  ]
+}

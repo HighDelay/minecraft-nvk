@@ -1,0 +1,13 @@
+{
+  "required": true,
+  "minVersion": "0.8.7",
+  "package": "dev.nvkbridge.mixin",
+  "compatibilityLevel": "JAVA_25",
+  "client": [
+    "NativeLibrariesBootstrapMixin",
+    "GraphicsBackendWarningMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
