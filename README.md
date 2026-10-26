@@ -8,9 +8,11 @@ The companion [driver frontend](https://github.com/HighDelay/nvidia-macos-driver
 
 - Minecraft **26.3**, Java **25**.
 - Fabric Loader **0.19.5+**, or NeoForge **26.3.0.99+** in the 26.3 line.
-- Intel macOS, a compatible NVIDIA driver and a matching native NVK runtime with window presentation. The driver's ordinary headless NVK library alone is insufficient.
+- Intel macOS Sequoia **15.5+** or Tahoe **26**, a compatible NVIDIA driver and a matching native NVK runtime with window presentation. The driver's ordinary headless NVK library alone is insufficient.
 
-Fabric Essential menu and multiplayer rendering were tested on RTX 2060 SUPER / Tahoe 26.7.1. NeoForge builds and offline transformation checks pass; a NeoForge game launch remains untested. See [test results](docs/TEST-RESULTS.md).
+Use a Minecraft **26.3** instance; older 1.21.x instances are incompatible. The bridge selects a runtime for Minecraft's existing Vulkan renderer.
+
+Fabric Essential menu and multiplayer rendering and a NeoForge **26.3.0.99** game session were tested on RTX 2060 SUPER / Tahoe 26.7.1. The user confirmed rendering and the logs identify native NVK. See [test results](docs/TEST-RESULTS.md).
 
 ## Build
 
@@ -32,15 +34,17 @@ Only the mod's own code, metadata and license are bundled. Fabric API is not req
 ## Install
 
 1. Put the jar matching your loader in the instance's `mods` directory.
-2. Build the [native runtime](https://github.com/HighDelay/nvidia-macos-driver/tree/main/nvk/native-macos) against your compatible driver. Keep its manifest and both libraries together in a persistent directory.
-3. Add this JVM argument to that instance, using the runtime directory's absolute path:
+2. Install [HighDelay's driver package](https://github.com/HighDelay/nvidia-macos-driver) with the native Minecraft runtime. It installs the manifest and both libraries under `/Library/GPUBundles/nvmtl/minecraft`.
+3. Add this to the instance's Java/JVM arguments, replacing any existing `-Dnvkbridge.runtime=...` argument:
 
    ```text
-   -Dnvkbridge.runtime=/absolute/path/to/nvk-runtime
+   -Dnvkbridge.runtime=/Library/GPUBundles/nvmtl/minecraft
    ```
 
 4. Select Minecraft's Vulkan graphics backend and restart the game.
 5. Check `NVK Bridge` startup messages and the F3 renderer string. The tested native renderer identifies itself as `NVK Mesa`, rather than MoltenVK.
+
+For a manually [built native runtime](https://github.com/HighDelay/nvidia-macos-driver/tree/main/nvk/native-macos), keep its manifest and both libraries together and use that directory's absolute path instead. [Aetherium](https://github.com/HighDelay/aetherium) provides optional Vulkan shader-pack support.
 
 The mod verifies the manifest, entry-library SHA-256 and Mach-O architecture before selection. After loading it checks the actual provider path, Vulkan instance version and Metal surface extensions. Minecraft still checks device features and confirms SDL uses the same Vulkan provider.
 

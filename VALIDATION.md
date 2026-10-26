@@ -14,14 +14,15 @@ Updated on Intel macOS Tahoe 26.7.1 on 2026-10-26 with Java 25 and Gradle 9.6.0.
 | Gradle wrapper integrity | Pass | Wrapper jar matched Gradle's published SHA-256; distribution SHA-256 is pinned. |
 | `:common:verifyNativeRuntime` against the final runtime | Pass | Actual mod selection, dylib load, provider path, SDL provider pointer equality, NVIDIA enumeration and Metal surface creation. |
 | Full Fabric Essential launch | Pass | Native NVK selected; menu and multiplayer rendering worked, confirmed by the user. |
+| NeoForge 26.3.0.99 game session | Pass | User confirmed correct operation in Minecraft 26.3; the session log identifies Vulkan 1.4.363 NVK Mesa 26.3.0-devel. |
 | OpenGL startup notification | Structural and real Mixin checks pass | The actual selected-backend and toast APIs match the pinned client. Both Mixin versions apply the startup hook with valid stacks; visible toast behavior still needs an in-game check. |
 
 The target client SHA-1 is `e877b6a07acd633fb3bb475002175cec036e7b87`; SHA-256 is `4508d006323f24fa02876310c192d739af56516eb259000ac50f0909a68c9a2d`. Its official metadata and the native integration requirements are linked in [the handoff sources](docs/SOURCES.md).
 
-The code compiles against Fabric Loader 0.19.5 to preserve Essential's existing loader, and NeoForge FML 12.0.12 for the 26.3 line. Only Fabric has been launched in game. Release jar hashes are in `dist/SHA256SUMS`.
+The code compiles against Fabric Loader 0.19.5 to preserve Essential's existing loader, and NeoForge FML 12.0.12 for the 26.3 line. Both loader variants have been launched in game on this desktop. Release jar hashes are in `dist/SHA256SUMS`.
 
 ## Native integration and limits
 
 The local runtime supplies Metal surfaces and swapchains around a private copy of the installed native NVK renderer. Real device requirements and vanilla Vulkan availability checks remain enabled. Native presentation, resize/restore and pixel validation pass on the 2060 SUPER. The mod also handles equivalent `/var` and `/private/var` or symlink spellings of an existing Vulkan override.
 
-See [TEST-RESULTS.md](docs/TEST-RESULTS.md) for exact identities, hardware evidence and limits. A controlled FPS comparison, NeoForge game launch, other GPUs, long sessions and general Vulkan WSI conformance remain untested. There is no zero-copy or broad modpack compatibility claim.
+See [TEST-RESULTS.md](docs/TEST-RESULTS.md) for exact identities, hardware evidence and limits. A controlled FPS comparison, Sequoia gameplay, other GPUs, long sessions and general Vulkan WSI conformance remain untested. There is no zero-copy or broad modpack compatibility claim.

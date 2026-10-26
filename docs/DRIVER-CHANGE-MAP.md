@@ -19,4 +19,4 @@ The shared Mixin configures LWJGL immediately before `VK.create()` in `NativeLib
 
 Use the [runtime contract](../RUNTIME-CONTRACT.md) and [manifest writer](../tools/write_runtime_manifest.py). The native package owns dependency relocation, driver ABI compatibility and actual presentation. An extension name or manifest string does not establish those properties.
 
-See [test results](TEST-RESULTS.md) for the tested hardware and limits. Multiple GPUs/windows, NeoForge gameplay, broad WSI conformance and a controlled FPS comparison remain unqualified.
+See [test results](TEST-RESULTS.md) for the tested Fabric Essential and NeoForge 26.3.0.99 sessions on RTX 2060 SUPER/Tahoe. Multiple GPUs/windows, Sequoia gameplay, broad WSI conformance and a controlled FPS comparison remain unqualified.

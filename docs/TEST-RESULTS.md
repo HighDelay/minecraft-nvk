@@ -8,6 +8,12 @@ Minecraft selected `Vulkan 1.4.363 NVK Mesa 26.3.0-devel` on the real NVIDIA dev
 
 The running game mapped the local frontend and private renderer. A short process profile contained `queue_present` → `copy_frame` → native NVK completion calls. No MoltenVK mapping was found during that native launch.
 
+## NeoForge integration
+
+A separate Minecraft **26.3** instance with **NeoForge 26.3.0.99**, LWJGL **3.4.3**, Java **25** and the NeoForge 0.1.1 bridge was tested on the same desktop. The user confirmed it works. Its session log records `Using graphics backend Vulkan, using drivers: 1.4.363 NVK Mesa 26.3.0-devel`, world-rendering buffer activity and an ordinary `Stopping!` on exit. This confirms a native NVK game session; no NeoForge FPS comparison or long-session stability claim is made.
+
+An earlier attempt used a Minecraft **1.21.1** / NeoForge **21.1.170** / Java **21** instance. Its loader rejected the jar before bridge initialization because it requires FML 12 and Minecraft 26.3. That instance uses an older OpenGL renderer and is outside the mod's supported versions.
+
 ## Checks
 
 | Check | Result |
@@ -51,7 +57,7 @@ The new OpenGL toast has structural API and real Mixin transformation checks aga
 - No controlled FPS comparison or removal of the previous refresh-related ceiling is established.
 - The current frontend waits for the GPU copy and allocates/imports presentation resources each frame. Resource reuse is a possible follow-up after profiling.
 - The tested renderer exposes one graphics/compute/transfer family, not a transfer-only family.
-- Only this GPU and Fabric instance have gameplay coverage. NeoForge game startup, other GPUs/drivers, mixed GPUs, multiple windows, device loss recovery and long sessions remain unqualified.
+- Only this GPU with Fabric Essential and NeoForge 26.3.0.99 has game-session coverage. Sequoia gameplay, other GPUs/drivers, mixed GPUs, multiple windows, device loss recovery and long sessions remain unqualified.
 - This is the implemented Minecraft presentation path, not a general Vulkan WSI conformance claim. Rendering mods making direct OpenGL calls still need compatible Vulkan implementations.
 
 See [validation](../VALIDATION.md), [runtime contract](../RUNTIME-CONTRACT.md) and [sources](SOURCES.md).
