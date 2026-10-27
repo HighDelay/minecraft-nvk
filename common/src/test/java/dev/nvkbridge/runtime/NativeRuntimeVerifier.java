@@ -27,9 +27,13 @@ public final class NativeRuntimeVerifier {
     }
 
     public static void main(String[] args) throws Exception {
-        require(args.length == 1 && !args[0].isBlank(), "Pass -PnvkRuntime=/absolute/runtime/root");
-        RuntimeManifest expected = RuntimeManifest.load(Path.of(args[0]));
-        System.setProperty("nvkbridge.runtime", args[0]);
+        require(args.length <= 1, "Use the installed runtime or pass -PnvkRuntime=/absolute/runtime/root");
+        boolean custom = args.length == 1 && !args[0].isBlank();
+        if (custom) System.setProperty("nvkbridge.runtime", args[0]);
+        else System.clearProperty("nvkbridge.runtime");
+        var selection = RuntimeSelector.select(System.getProperties());
+        require(selection.selected(), "Runtime selection: " + selection.status() + ": " + selection.message());
+        RuntimeManifest expected = selection.runtime();
         Configuration.VULKAN_EXPLICIT_INIT.set(true);
         NvkBridge.configureBeforeVulkanCreate();
         VK.create();
@@ -63,7 +67,8 @@ public final class NativeRuntimeVerifier {
             SDL_Vulkan_DestroySurface(instance, surface.get(0), null);
             vkDestroyInstance(instance, null);
             System.out.println("PASS actual LWJGL + mod runtime selection + SDL provider equality + NVIDIA Metal surface: "
-                + props.deviceNameString() + "; provider=" + provider.getPath());
+                + props.deviceNameString() + "; provider=" + provider.getPath()
+                + "; selection=" + (custom ? "explicit runtime" : "automatic installed runtime"));
         } finally {
             SDL_DestroyWindow(window);
             SDL_Vulkan_UnloadLibrary();

@@ -48,13 +48,15 @@ The recommended first optimized presentation path performs one GPU copy into imp
 
 ## Mod configuration and startup
 
-Add this JVM property to the Minecraft instance:
+Starting with mod **0.1.2**, Intel macOS instances automatically check `/Library/GPUBundles/nvmtl/minecraft`. Installing the driver package and matching bridge jar is sufficient; select Minecraft's Vulkan backend and restart. No JVM runtime property is needed for that installed location.
+
+For a custom runtime directory, set this optional JVM property:
 
 ```text
 -Dnvkbridge.runtime=/absolute/path/to/nvk-runtime
 ```
 
-The default is no override when that property is absent. `-Dnvkbridge.enabled=false` disables selection. Unsupported operating systems and Apple Silicon keep normal startup. Invalid manifests are rejected before a native override is applied, with a log message. A competing explicit `org.lwjgl.vulkan.libname` setting is preserved; remove it when selecting this runtime through the mod.
+An absent or blank runtime property uses automatic detection. If the default directory is missing, selection stays unconfigured and Minecraft keeps its normal provider. An explicit custom path takes priority; an invalid custom runtime is reported without substituting the installed runtime. `-Dnvkbridge.enabled=false` disables selection, including automatic detection. Unsupported operating systems and Apple Silicon keep normal startup. Invalid manifests are rejected before a native override is applied, with a log message. A competing explicit `org.lwjgl.vulkan.libname` setting is preserved; remove it when selecting this runtime through the mod.
 
 The shared Mixin targets `com.mojang.blaze3d.platform.NativeLibrariesBootstrap.tryLoadingVulkan()Z`, immediately before and after `org.lwjgl.vulkan.VK.create()V`. It sets `Configuration.VULKAN_LIBRARY_NAME` before loading and verifies the provider afterwards. No separate SDL or GLFW initialization is added.
 

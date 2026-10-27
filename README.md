@@ -25,8 +25,8 @@ Use `gradlew.bat build` on Windows. The wrapper downloads pinned Gradle 9.6.0. I
 The installable jars and `SHA256SUMS` are written to `dist/`:
 
 ```text
-nvk-bridge-fabric-26.3-0.1.1.jar
-nvk-bridge-neoforge-26.3-0.1.1.jar
+nvk-bridge-fabric-26.3-0.1.2.jar
+nvk-bridge-neoforge-26.3-0.1.2.jar
 ```
 
 Only the mod's own code, metadata and license are bundled. Fabric API is not required; game, loader, LWJGL and Mixin classes are supplied by the installation.
@@ -35,16 +35,18 @@ Only the mod's own code, metadata and license are bundled. Fabric API is not req
 
 1. Put the jar matching your loader in the instance's `mods` directory.
 2. Install [HighDelay's driver package](https://github.com/HighDelay/nvidia-macos-driver) with the native Minecraft runtime. It installs the manifest and both libraries under `/Library/GPUBundles/nvmtl/minecraft`.
-3. Add this to the instance's Java/JVM arguments, replacing any existing `-Dnvkbridge.runtime=...` argument:
+3. Select Minecraft's Vulkan graphics backend and restart the game.
+4. Check `NVK Bridge` startup messages and the F3 renderer string. The tested native renderer identifies itself as `NVK Mesa`, rather than MoltenVK.
 
-   ```text
-   -Dnvkbridge.runtime=/Library/GPUBundles/nvmtl/minecraft
-   ```
+**Version 0.1.2 automatically detects the installed runtime. No JVM argument is required.** You can remove an existing `-Dnvkbridge.runtime=/Library/GPUBundles/nvmtl/minecraft` argument after updating the bridge jar. Keep only one bridge jar in the instance's `mods` folder.
 
-4. Select Minecraft's Vulkan graphics backend and restart the game.
-5. Check `NVK Bridge` startup messages and the F3 renderer string. The tested native renderer identifies itself as `NVK Mesa`, rather than MoltenVK.
+For a manually [built native runtime](https://github.com/HighDelay/nvidia-macos-driver/tree/main/nvk/native-macos), keep its manifest and both libraries together and set its absolute directory in the instance's Java/JVM arguments:
 
-For a manually [built native runtime](https://github.com/HighDelay/nvidia-macos-driver/tree/main/nvk/native-macos), keep its manifest and both libraries together and use that directory's absolute path instead. [Aetherium](https://github.com/HighDelay/aetherium) provides optional Vulkan shader-pack support.
+```text
+-Dnvkbridge.runtime=/absolute/path/to/nvk-runtime
+```
+
+An explicit path takes priority over automatic detection. A missing default directory leaves the normal Vulkan provider selected; a missing or invalid custom path is reported without substituting the installed runtime. [Aetherium](https://github.com/HighDelay/aetherium) provides optional Vulkan shader-pack support.
 
 The mod verifies the manifest, entry-library SHA-256 and Mach-O architecture before selection. After loading it checks the actual provider path, Vulkan instance version and Metal surface extensions. Minecraft still checks device features and confirms SDL uses the same Vulkan provider.
 
@@ -54,7 +56,7 @@ An explicit competing `-Dorg.lwjgl.vulkan.libname=...` override takes precedence
 
 ## Disable or compare
 
-Add `-Dnvkbridge.enabled=false` and restart Minecraft to use its normal provider. Removing the bridge jar, or removing the runtime property, also leaves ordinary provider selection intact. Unsupported platforms receive no override.
+Add `-Dnvkbridge.enabled=false` and restart Minecraft to use its normal provider, or remove the bridge jar. Removing a custom runtime property returns to automatic detection of the installed runtime. Unsupported platforms receive no override.
 
 Explicit native loading does not automatically retry MoltenVK after a failure. Minecraft handles Vulkan unavailability; the mod does not unload or replace Vulkan mid-process.
 
@@ -71,13 +73,13 @@ python3 tools/verify_release.py --download-client
 
 The Python verifier requires Python 3.11+. The exact official client is downloaded only into ignored `.cache/`, checked against its pinned hash and inspected as data; it is not redistributed.
 
-On Intel macOS, test actual mod/LWJGL/SDL loading with a built runtime:
+On Intel macOS, test automatic detection and actual mod/LWJGL/SDL loading with the installed runtime:
 
 ```sh
-./gradlew :common:verifyNativeRuntime -PnvkRuntime=/absolute/path/to/nvk-runtime
+./gradlew :common:verifyNativeRuntime
 ```
 
-This creates a hidden window and a real Metal surface, not a Minecraft session or benchmark. See [validation](VALIDATION.md), [runtime contract](RUNTIME-CONTRACT.md) and [sources](docs/SOURCES.md).
+Add `-PnvkRuntime=/absolute/path/to/nvk-runtime` to test a custom build instead. This creates a hidden window and a real Metal surface, not a Minecraft session or benchmark. See [validation](VALIDATION.md), [runtime contract](RUNTIME-CONTRACT.md) and [sources](docs/SOURCES.md).
 
 ## License
 

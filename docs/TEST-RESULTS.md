@@ -1,4 +1,4 @@
-# Test results — 2026-10-26
+# Test results — 2026-10-26–27
 
 ## Hardware integration
 
@@ -19,7 +19,7 @@ An earlier attempt used a Minecraft **1.21.1** / NeoForge **21.1.170** / Java **
 | Check | Result |
 |---|---|
 | Gradle build | Fabric and NeoForge jars compile/package. |
-| Runtime selection unit tests | 18 pass, zero failures/errors/skips. |
+| Runtime selection unit tests | 26 pass on 0.1.2, zero failures/errors/skips. |
 | Release verifier | Shared code, Java 25 bytecode, metadata and packaged license checked; game/loader/LWJGL classes excluded. |
 | Exact client hooks | Target, call position, Throwable handler and vanilla SDL provider check verified. |
 | Real Mixin transformation | Pass with Mixin 0.17.4 and 0.17.5; transformed methods pass ASM stack analysis. |
@@ -51,6 +51,19 @@ Both MIT artifacts preserve all eight class files of their respective tested bui
 | NeoForge 0.1.1 | `809d803abf8bc1f30668e49b0a7619292e34d0d02ec18d88b6da2ccaf5d0a30b` |
 
 The new OpenGL toast has structural API and real Mixin transformation checks against the exact client, with stack analysis on both Mixin versions. Its visible in-game appearance has not been tested yet. It runs after startup and only checks the selected backend; rendering and Vulkan bootstrap classes are unchanged.
+
+## Automatic runtime detection — 0.1.2
+
+On 2026-10-27 the selector was updated to use `/Library/GPUBundles/nvmtl/minecraft` automatically on Intel macOS when no custom runtime property is supplied. The existing manifest, hash, architecture and provider checks remain active. Custom paths take priority, `nvkbridge.enabled=false` still disables the bridge, explicit competing LWJGL selections remain unchanged and a missing default directory keeps normal provider selection.
+
+Both loader jars build and pass the release verifier. All 26 selector tests pass, including automatic selection, invalid defaults, custom-path priority and preserving explicit overrides. The exact-client hook check and real Mixin 0.17.4 transformation pass.
+
+Running `:common:verifyNativeRuntime` without a runtime argument loaded `/Library/GPUBundles/nvmtl/minecraft/lib/libnvk_minecraft.dylib`, verified the NVIDIA device and SDL/LWJGL provider equality, and created a Metal surface on the RTX 2060 SUPER. The entry and private renderer hashes remain unchanged from the native integration above. A fresh 0.1.2 full-game session remains pending; the Fabric and NeoForge gameplay reports above are for 0.1.1.
+
+| Artifact | SHA-256 |
+|---|---|
+| Fabric 0.1.2 | `d6849faf8010ca3152d2d8c1756611cb3ca92970f83b514182da3d61007ff4cf` |
+| NeoForge 0.1.2 | `a32df78bb9e2ac57be8fa65bf9215cf1599fcb1aa1a20743bca71a49072af8b8` |
 
 ## Limits
 

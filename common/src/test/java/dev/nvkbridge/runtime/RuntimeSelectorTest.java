@@ -53,10 +53,89 @@ class RuntimeSelectorTest {
     }
 
     @Test
-    void unsetRuntimeDoesNotSearchOrChangeSystemDriver() {
+    void missingInstalledRuntimeKeepsNormalProvider() {
         Properties settings = settings(temporary);
         settings.remove("nvkbridge.runtime");
-        assertEquals(UNCONFIGURED, RuntimeSelector.select(settings).status());
+        assertEquals(UNCONFIGURED, RuntimeSelector.select(settings, temporary.resolve("not-installed")).status());
+    }
+
+    @Test
+    void automaticallySelectsVerifiedInstalledRuntimeWithoutChangingSettings() throws Exception {
+        Path root = makeRuntime("installed runtime", thinDylib(0x01000007));
+        Properties settings = settings(temporary);
+        settings.remove("nvkbridge.runtime");
+        Properties original = (Properties) settings.clone();
+        var selection = RuntimeSelector.select(settings, root);
+        assertEquals(SELECTED, selection.status());
+        assertEquals(root.toRealPath(), selection.runtime().root());
+        assertEquals(original, settings);
+    }
+
+    @Test
+    void blankRuntimePropertyUsesInstalledRuntime() throws Exception {
+        Path root = makeRuntime("installed", thinDylib(0x01000007));
+        Properties settings = settings(temporary);
+        settings.setProperty("nvkbridge.runtime", "  ");
+        assertEquals(SELECTED, RuntimeSelector.select(settings, root).status());
+    }
+
+    @Test
+    void customRuntimeTakesPrecedenceOverInstalledRuntime() throws Exception {
+        Path installed = makeRuntime("installed", thinDylib(0x01000007));
+        Path custom = makeRuntime("custom", thinDylib(0x01000007));
+        var selection = RuntimeSelector.select(settings(custom), installed);
+        assertEquals(SELECTED, selection.status());
+        assertEquals(custom.toRealPath(), selection.runtime().root());
+    }
+
+    @Test
+    void invalidCustomRuntimeDoesNotFallBackToInstalledRuntime() throws Exception {
+        Path installed = makeRuntime("installed", thinDylib(0x01000007));
+        assertEquals(INVALID, RuntimeSelector.select(settings(temporary.resolve("bad-custom-path")), installed).status());
+    }
+
+    @Test
+    void automaticallyDiscoveredRuntimeStillRequiresValidHash() throws Exception {
+        Path root = makeRuntime("installed", thinDylib(0x01000007));
+        byte[] changed = thinDylib(0x01000007);
+        changed[31] = 1;
+        Files.write(root.resolve("lib/libvulkan_nouveau.dylib"), changed);
+        Properties settings = settings(temporary);
+        settings.remove("nvkbridge.runtime");
+        var selection = RuntimeSelector.select(settings, root);
+        assertEquals(INVALID, selection.status());
+        assertTrue(selection.message().contains("SHA-256"));
+    }
+
+    @Test
+    void automaticSelectionPreservesExplicitLwjglOverride() throws Exception {
+        Path root = makeRuntime("installed", thinDylib(0x01000007));
+        Properties settings = settings(temporary);
+        settings.remove("nvkbridge.runtime");
+        settings.setProperty("org.lwjgl.vulkan.libname", "MoltenVK");
+        assertEquals(CONFLICT, RuntimeSelector.select(settings, root).status());
+        assertEquals("MoltenVK", settings.getProperty("org.lwjgl.vulkan.libname"));
+    }
+
+    @Test
+    void disabledSettingPreventsAutomaticSelection() throws Exception {
+        Path root = makeRuntime("installed", thinDylib(0x01000007));
+        Properties settings = settings(temporary);
+        settings.remove("nvkbridge.runtime");
+        settings.setProperty("nvkbridge.enabled", "false");
+        assertEquals(DISABLED, RuntimeSelector.select(settings, root).status());
+    }
+
+    @Test
+    void automaticSelectionDoesNotApplyToWindowsOrAppleSilicon() throws Exception {
+        Path root = makeRuntime("installed", thinDylib(0x01000007));
+        Properties settings = settings(temporary);
+        settings.remove("nvkbridge.runtime");
+        settings.setProperty("os.name", "Windows 11");
+        assertEquals(UNSUPPORTED_PLATFORM, RuntimeSelector.select(settings, root).status());
+        settings.setProperty("os.name", "Mac OS X");
+        settings.setProperty("os.arch", "aarch64");
+        assertEquals(UNSUPPORTED_PLATFORM, RuntimeSelector.select(settings, root).status());
     }
 
     @Test
