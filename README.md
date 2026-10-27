@@ -4,6 +4,15 @@ Run Minecraft 26.3's Vulkan renderer through native NVK on Intel macOS with a co
 
 The companion [driver frontend](https://github.com/HighDelay/nvidia-macos-driver/tree/main/nvk/native-macos) supplies Metal surfaces and swapchains. Rendering goes directly through NVK, bypassing MoltenVK and Metal shader translation. Finished frames reach the Metal drawable through a GPU copy. The mod itself performs no rendering or pixel transfer.
 
+| Provider | Rendering path with HighDelay's driver |
+|---|---|
+| MoltenVK | Minecraft Vulkan → MoltenVK → Metal → NVMTL → NVK → NVIDIA GPU |
+| NVK Bridge | Minecraft Vulkan → native NVK runtime → NVIDIA GPU |
+
+The native path removes MoltenVK's Vulkan-to-Metal conversion and NVMTL's Metal/AIR-to-SPIR-V translation.
+NVK shader compilation and macOS drawable presentation remain. Fewer translation stages can reduce CPU and
+shader-conversion overhead, but a controlled FPS gain over MoltenVK has not yet been measured.
+
 ## Requirements
 
 - Minecraft **26.3**, Java **25**.
